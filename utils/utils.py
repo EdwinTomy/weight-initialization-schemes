@@ -8,7 +8,6 @@ from sklearn.neighbors import NearestNeighbors
 
 
 class Utils:
-
     @staticmethod
     def create_init_set_kmeans(x_input_set, y_input_set, num_elements_in_init_set, random_seed):
         # Assumption: First dimension in input_set_x is the number of instances

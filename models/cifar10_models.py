@@ -6,12 +6,7 @@ from tensorflow.keras.models import Model
 from enum import Enum
 from tensorflow.keras.datasets import cifar10
 import keras
-from initialization_techniques.scheme2_init import *
-from initialization_techniques.scheme2_init import WeightInitScheme2Params
-from initialization_techniques.scheme3_init import *
-from initialization_techniques.scheme3_init import WeightInitScheme3Params
-from initialization_techniques.scheme5_init import *
-from initialization_techniques.scheme5_init import WeightInitScheme5Params
+
 
 
 class CIFARModels:
