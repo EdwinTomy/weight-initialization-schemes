@@ -2,18 +2,50 @@ from __future__ import print_function
 import tensorflow as tf
 import tensorflow.keras.layers as layers
 from tensorflow.keras.models import Model
-
+from initialization_techniques.initialization_techniques_manager import initializationTechniqueOptionsName
+import initialization_techniques.base_scheme_init as base_scheme_init
 from tensorflow.keras.datasets import cifar10
 import keras
-from initialization_techniques.scheme2_init import *
-from initialization_techniques.scheme2_init import WeightInitScheme2Params
-from initialization_techniques.scheme3_init import *
-from initialization_techniques.scheme3_init import WeightInitScheme3Params
-from initialization_techniques.scheme5_init import *
+import numpy as np
+
 from initialization_techniques.scheme5_init import WeightInitScheme5Params
 from models.cifar10_models import CIFARModels
 
 import random
+
+
+def run_model(model_type, initial_weights, initialization, init_set_x, init_set_y, x_test, y_test,
+              x_train, y_train, opt=keras.optimizers.SGD(learning_rate=0.01), batch_size=60, epochs=10):
+    print("################################", initialization, " ##################################")
+    model = CIFARModels.create_model(model_type)
+    model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
+    model.set_weights(initial_weights)
+
+    # - Defining the parameters of the initialization technique for ReLU layers
+    params = base_scheme_init.WeightInitSchemeParams(batch=init_set_x, verbose=True)
+
+    # - Run initialization process
+    model = base_scheme_init.WeightInitScheme.initialize(initialization, model, params)
+
+    loss_and_acc = model.test_on_batch(init_set_x, init_set_y)
+    init_set_loss, init_set_acc = loss_and_acc[0], loss_and_acc[1]
+    print("init_set_loss:", init_set_loss, "init_set_acc", init_set_acc)
+
+    loss_and_acc = model.test_on_batch(x_test, y_test)
+    initial_val_loss, initial_val_acc = loss_and_acc[0], loss_and_acc[1]
+    print("initial_val_loss:", initial_val_loss, "initial_val_acc", initial_val_acc)
+
+    train_history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs,
+                              validation_split=0.1)
+
+    val_loss = train_history.history['val_loss']
+    val_acc = train_history.history['val_accuracy']
+
+    val_loss.insert(0, initial_val_loss)
+    val_acc.insert(0, initial_val_acc)
+    print("Loss: ", val_loss)
+    print("Accuracy: ", val_acc)
+    return val_loss, val_acc
 
 
 def main():
@@ -50,108 +82,28 @@ def main():
     # Model list
     how_many = 10
     model_list = ["cifar2", "cifar2_no_cl", "cifar4", "cifar4_no_cl", "cifar6", "cifar6_no_cl"]
-    storage = np.zeros((how_many, len(model_list), 4, 2, epochs+1))
+    storage = np.zeros((how_many, len(model_list), 4, 2, epochs + 1))
 
     for i in range(how_many):
         for j, model_type in enumerate(model_list):
-            print("################################ Baseline ##################################")
             model = CIFARModels.create_model(model_type)
-            model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
             initial_weights = model.get_weights()
 
-            loss_and_acc = model.test_on_batch(init_set_x, init_set_y)
-            init_set_loss, init_set_acc = loss_and_acc[0], loss_and_acc[1]
-            print("init_set_loss:", init_set_loss, "init_set_acc", init_set_acc)
-
-            loss_and_acc = model.test_on_batch(x_test, y_test)
-            initial_val_loss, initial_val_acc = loss_and_acc[0], loss_and_acc[1]
-            print("initial_val_loss:", initial_val_loss, "initial_val_acc", initial_val_acc)
-
-            train_history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs,
-                                            validation_split=0.1)
-
-            val_loss = train_history.history['val_loss']
-            val_acc = train_history.history['val_accuracy']
-
-            val_loss.insert(0, initial_val_loss)
-            val_acc.insert(0, initial_val_acc)
-            print("Loss: ", val_loss)
-            print("Accuracy: ", val_acc)
+            # Baseline
+            val_loss, val_acc = run_model(model_type, initial_weights, initializationTechniqueOptionsName.BASELINE,
+                                          init_set_x, init_set_y, x_test, y_test, x_train, y_train)
             storage[i, j, 0, 0, :] = val_loss
             storage[i, j, 0, 1, :] = val_acc
 
-            ################################## Scheme 2 ##################################
-            print("################################ Scheme 2 ##################################")
-            model = CIFARModels.create_model(model_type)
-            model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
-            model.set_weights(initial_weights)
-
-            # - Defining the parameters of the initialization technique for ReLU layers
-            layers_init_params = WeightInitScheme2Params(
-                batch=init_set_x,
-                verbose=True,
-            )
-
-            # - Run initialization process
-            model = WeightInitScheme2.initialize(model, layers_init_params)
-
-            # Compute loss and accuracy on initialization dataset
-            loss_and_acc = model.test_on_batch(init_set_x, init_set_y)
-            init_set_loss, init_set_acc = loss_and_acc[0], loss_and_acc[1]
-            print("init_set_loss:", init_set_loss, "init_set_acc", init_set_acc)
-
-            loss_and_acc = model.test_on_batch(x_test, y_test)
-            initial_val_loss, initial_val_acc = loss_and_acc[0], loss_and_acc[1]
-            print("initial_val_loss:", initial_val_loss, "initial_val_acc", initial_val_acc)
-
-            train_history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs,
-                                      validation_split=0.1, shuffle=True)
-
-            val_loss = train_history.history['val_loss']
-            val_acc = train_history.history['val_accuracy']
-
-            val_loss.insert(0, initial_val_loss)
-            val_acc.insert(0, initial_val_acc)
-            print("Loss: ", val_loss)
-            print("Accuracy: ", val_acc)
+            # Scheme 2
+            val_loss, val_acc = run_model(model_type, initial_weights, initializationTechniqueOptionsName.SCHEME2,
+                                          init_set_x, init_set_y, x_test, y_test, x_train, y_train)
             storage[i, j, 1, 0, :] = val_loss
             storage[i, j, 1, 1, :] = val_acc
 
-            ################################## Scheme 3 ##################################
-            print("################################ Scheme 3 ##################################")
-            model = CIFARModels.create_model(model_type)
-            model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
-            model.set_weights(initial_weights)
-
-            # - Defining the parameters of the initialization technique for ReLU layers
-            layers_init_params = WeightInitScheme3Params(
-                batch=init_set_x,
-                verbose=True,
-            )
-
-            # - Run initialization process
-            model = WeightInitScheme3.initialize(model, layers_init_params)
-
-            # Compute loss and accuracy on initialization dataset
-            loss_and_acc = model.test_on_batch(init_set_x, init_set_y)
-            init_set_loss, init_set_acc = loss_and_acc[0], loss_and_acc[1]
-            print("init_set_loss:", init_set_loss, "init_set_acc", init_set_acc)
-
-            loss_and_acc = model.test_on_batch(x_test, y_test)
-            initial_val_loss, initial_val_acc = loss_and_acc[0], loss_and_acc[1]
-            print("initial_val_loss:", initial_val_loss, "initial_val_acc", initial_val_acc)
-
-            train_history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs,
-                                      validation_split=0.1, shuffle=True)
-
-            val_loss = train_history.history['val_loss']
-            val_acc = train_history.history['val_accuracy']
-
-            val_loss.insert(0, initial_val_loss)
-            val_acc.insert(0, initial_val_acc)
-            print("Loss: ", val_loss)
-            print("Accuracy: ", val_acc)
-
+            # Scheme 3
+            val_loss, val_acc = run_model(model_type, initial_weights, initializationTechniqueOptionsName.SCHEME3,
+                                          init_set_x, init_set_y, x_test, y_test, x_train, y_train)
             storage[i, j, 2, 0, :] = val_loss
             storage[i, j, 2, 1, :] = val_acc
 

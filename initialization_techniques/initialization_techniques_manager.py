@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Dense, Convolution2D, Convolution1D, Convolu
 
 
 class InitializationTechniqueOptions(Enum):
+    BASELINE = 0
     SCHEME2 = 2
     SCHEME3 = 3
     SCHEME5 = 5
@@ -13,6 +14,7 @@ class InitializationTechniqueOptions(Enum):
 
 
 class InitializationTechniqueOptionsName(Enum):
+    BASELINE = 'BASELINE'
     SCHEME2 = 'SCHEME 2'
     SCHEME3 = 'SCHEME 3'
     SCHEME5 = 'SCHEME 5'
@@ -64,20 +66,22 @@ class InitializationTechniqueManager:
         non_convolutional_classes = (Dense)
 
         weight_init_dictionary = {
+            InitializationTechniqueOptions.BASELINE: model,
+
             InitializationTechniqueOptions.SCHEME2: WeightInitScheme.initialize(
-                model, params, InitializationTechniqueOptionsName.weight_init_scheme_2_and_3,
+                model, params, InitializationTechniqueManager.weight_init_scheme_2_and_3,
                 InitializationTechniqueOptionsName.SCHEME2, convolutional_classes),
 
             InitializationTechniqueOptions.SCHEME3: WeightInitScheme.initialize(
-                model, params, InitializationTechniqueOptionsName.weight_init_scheme_2_and_3,
+                model, params, InitializationTechniqueManager.weight_init_scheme_2_and_3,
                 InitializationTechniqueOptionsName.SCHEME3, non_convolutional_classes),
 
             InitializationTechniqueOptions.SCHEME5: WeightInitScheme.initialize(
-                model, params, InitializationTechniqueOptionsName.weight_init_scheme_5,
+                model, params, InitializationTechniqueManager.weight_init_scheme_5,
                 InitializationTechniqueOptionsName.SCHEME5, non_convolutional_classes),
 
             InitializationTechniqueOptions.SCHEME6: WeightInitScheme.initialize(
-                model, params, InitializationTechniqueOptionsName.weight_init_scheme_6,
+                model, params, InitializationTechniqueManager.weight_init_scheme_6,
                 InitializationTechniqueOptionsName.SCHEME6, non_convolutional_classes),
         }
 
