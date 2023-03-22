@@ -16,3 +16,6 @@ Where the numpy arrays that contain the results from generate_results are stored
 
 #### 5. utils
 Some utility functions, including loading datasets
+
+#### 6. analyzing_results
+Files that were used to create the charts using data from results. Currently empty since I used collab for creating the files, will reformat it into here in the future. Eitherway, the charts are in the presentation.
