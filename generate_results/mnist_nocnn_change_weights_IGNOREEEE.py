@@ -13,7 +13,7 @@ from models.mnist_models_nocnn import MNISTModels
 
 import random
 
-
+###### Ignore this file #####################
 def main():
     # Model / data parameters
     num_classes = 10

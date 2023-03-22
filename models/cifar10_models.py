@@ -98,3 +98,75 @@ class CIFARModels:
                 ]
             )
 
+        num_classes = 10
+        if model_type == "mnist":
+            return keras.Sequential(
+                [
+                    layers.Input(shape=(28, 28, 1)),
+                    layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+                    layers.MaxPooling2D(pool_size=(2, 2)),
+                    layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+                    layers.MaxPooling2D(pool_size=(2, 2)),
+                    layers.Flatten(),
+                    layers.Dense(300, activation="relu"),
+                    layers.Dense(100, activation="relu"),
+                    layers.Dense(num_classes, activation="softmax"),
+                ]
+            )
+
+        if model_type == "mnist_no_cl":
+            return keras.Sequential(
+                [
+                    layers.Input(shape=(28, 28, 1)),
+                    layers.Flatten(),
+                    layers.Dense(300, activation="relu"),
+                    layers.Dense(100, activation="relu"),
+                    layers.Dense(num_classes, activation="softmax"),
+                ]
+            )
+
+        if model_type == "mnist_nocnn":
+            return keras.Sequential(
+                [
+                    layers.Input(shape=(28, 28, 1)),
+                    layers.Flatten(),
+                    layers.Dense(256, activation="relu"),
+                    layers.Dense(256, activation="relu"),
+                    layers.Dense(256, activation="relu"),
+                    layers.Dense(256, activation="relu"),
+                    layers.Dense(num_classes, activation="softmax"),
+                ]
+            )
+
+        if model_type == "mnist_nocnn_4":
+            return keras.Sequential(
+                [
+                    layers.Input(shape=(28, 28, 1)),
+                    layers.Flatten(),
+                    layers.Dense(4, activation="relu"),
+                    layers.Dense(4, activation="relu"),
+                    layers.Dense(4, activation="relu"),
+                    layers.Dense(4, activation="relu"),
+                    layers.Dense(num_classes, activation="softmax"),
+                ]
+            )
+
+        if model_type == "mnist_nocnn_8":
+            return keras.Sequential(
+                [
+                    layers.Input(shape=(28, 28, 1)),
+                    layers.Flatten(),
+                    layers.Dense(8, activation="relu"),
+                    layers.Dense(8, activation="relu"),
+                    layers.Dense(8, activation="relu"),
+                    layers.Dense(8, activation="relu"),
+                    layers.Dense(num_classes, activation="softmax"),
+                ]
+            )
+
+
+
+
+
+
+
