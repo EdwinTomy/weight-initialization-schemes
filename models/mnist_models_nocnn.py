@@ -6,11 +6,6 @@ from tensorflow.keras.models import Model
 from enum import Enum
 from tensorflow.keras.datasets import cifar10
 import keras
-from initialization_techniques.scheme3_init import *
-from initialization_techniques.scheme3_init import WeightInitScheme3Params
-from initialization_techniques.scheme6_init import *
-from initialization_techniques.scheme6_init import WeightInitScheme6Params
-
 
 class MNISTModels:
 
